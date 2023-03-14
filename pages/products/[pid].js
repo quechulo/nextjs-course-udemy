@@ -32,7 +32,7 @@ export async function getStaticProps(context) {
   const data = await getData();
   const product = data.products.find((product) => product.id === productId);
 
-  console.log(product);
+  // console.log(product);
 
   if (!product) {
     return { notFound: true };
