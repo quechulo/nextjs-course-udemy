@@ -1,40 +1,43 @@
-import { Fragment, useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import useSWR from "swr";
+import { Fragment, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import useSWR from 'swr';
 
-import { getFilteredEvents } from "../../helpers/api-utils";
-import EventList from "../../components/events/event-list";
-import ResultsTitle from "../../components/events/results-title";
-import Button from "../../components/ui/button";
-import ErrorAlert from "../../components/ui/error-alert";
+import { getFilteredEvents } from '../../helpers/api-util';
+import EventList from '../../components/events/event-list';
+import ResultsTitle from '../../components/events/results-title';
+import Button from '../../components/ui/button';
+import ErrorAlert from '../../components/ui/error-alert';
 
 function FilteredEventsPage(props) {
-  const router = useRouter();
   const [loadedEvents, setLoadedEvents] = useState();
+  const router = useRouter();
+
   const filterData = router.query.slug;
 
-  const { data, error, isLoading } = useSWR(
-    "https://nextjs-course-bde02-default-rtdb.europe-west1.firebasedatabase.app/events.json",
-    (...args) => fetch(...args).then((res) => res.json())
+  const { data, error } = useSWR(
+    'https://nextjs-course-c81cc-default-rtdb.firebaseio.com/events.json',
+    (url) => fetch(url).then(res => res.json())
   );
+
   useEffect(() => {
     if (data) {
       const events = [];
+
       for (const key in data) {
         events.push({
           id: key,
           ...data[key],
         });
       }
+
       setLoadedEvents(events);
     }
   }, [data]);
 
   if (!loadedEvents) {
-    return <p className="center">Loading...</p>;
+    return <p className='center'>Loading...</p>;
   }
 
-  // const filteredEvents = props.filteredEvents;
   const filteredYear = filterData[0];
   const filteredMonth = filterData[1];
 
@@ -47,33 +50,22 @@ function FilteredEventsPage(props) {
     numYear > 2030 ||
     numYear < 2021 ||
     numMonth < 1 ||
-    numMonth > 12
+    numMonth > 12 ||
+    error
   ) {
     return (
       <Fragment>
         <ErrorAlert>
-          <p>Wrong filter data applied</p>
+          <p>Invalid filter. Please adjust your values!</p>
         </ErrorAlert>
-        <div className="center">
-          <Button link="/events">Show All Events</Button>
+        <div className='center'>
+          <Button link='/events'>Show All Events</Button>
         </div>
       </Fragment>
     );
   }
 
-  // if (props.hasError) {
-  //   return (
-  //     <Fragment>
-  //       <ErrorAlert>
-  //         <p>There is a problem with chosen filter!</p>
-  //       </ErrorAlert>
-  //       <div className="center">
-  //         <Button link="/events">Show All Events</Button>
-  //       </div>
-  //     </Fragment>
-  //   );
-  // }
-  let filteredEvents = loadedEvents.filter((event) => {
+  const filteredEvents = loadedEvents.filter((event) => {
     const eventDate = new Date(event.date);
     return (
       eventDate.getFullYear() === numYear &&
@@ -87,8 +79,8 @@ function FilteredEventsPage(props) {
         <ErrorAlert>
           <p>No events found for the chosen filter!</p>
         </ErrorAlert>
-        <div className="center">
-          <Button link="/events">Show All Events</Button>
+        <div className='center'>
+          <Button link='/events'>Show All Events</Button>
         </div>
       </Fragment>
     );
@@ -124,9 +116,7 @@ function FilteredEventsPage(props) {
 //     numMonth > 12
 //   ) {
 //     return {
-//       props: {
-//         hasError: true,
-//       },
+//       props: { hasError: true },
 //       // notFound: true,
 //       // redirect: {
 //       //   destination: '/error'
@@ -139,14 +129,13 @@ function FilteredEventsPage(props) {
 //     month: numMonth,
 //   });
 
-//   console.log("Server Side code");
-
 //   return {
 //     props: {
-//       numYear: numYear,
-//       numMonth: numMonth,
-//       hasError: false,
-//       filteredEvents: filteredEvents,
+//       events: filteredEvents,
+//       date: {
+//         year: numYear,
+//         month: numMonth,
+//       },
 //     },
 //   };
 // }
