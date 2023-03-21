@@ -1,7 +1,10 @@
+import { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import classes from './new-comment.module.css';
 
 function NewComment(props) {
+  const router = useRouter();
+  const { eventId } = router.query;
   const [isInvalid, setIsInvalid] = useState(false);
 
   const emailInputRef = useRef();
@@ -27,11 +30,13 @@ function NewComment(props) {
       setIsInvalid(true);
       return;
     }
-
+    
     props.onAddComment({
+      id: eventId,
+      date: new Date().toISOString,
       email: enteredEmail,
       name: enteredName,
-      text: enteredComment,
+      comment: enteredComment,
     });
   }
 
@@ -52,7 +57,7 @@ function NewComment(props) {
         <textarea id='comment' rows='5' ref={commentInputRef}></textarea>
       </div>
       {isInvalid && <p>Please enter a valid email address and comment!</p>}
-      <button>Submit</button>
+      <button onClick={sendCommentHandler}>Submit</button>
     </form>
   );
 }
