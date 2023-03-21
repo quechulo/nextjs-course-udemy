@@ -8,9 +8,11 @@ import EventContent from '../../components/event-detail/event-content';
 import ErrorAlert from '../../components/ui/error-alert';
 import Comments from '../../components/input/comments';
 
+
 function EventDetailPage(props) {
   const event = props.selectedEvent;
-
+  
+  
   if (!event) {
     return (
       <div className="center">
@@ -39,18 +41,30 @@ function EventDetailPage(props) {
         <p>{event.description}</p>
       </EventContent>
       <Comments eventId={event.id} />
-    </Fragment>
+  </Fragment>
   );
 }
 
 export async function getStaticProps(context) {
   const eventId = context.params.eventId;
-
   const event = await getEventById(eventId);
+
+  let fetchedComments = [];
+  await fetch(`/api/comments/${eventId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      fetchedComments = data.comments;
+      console.log(fetchedComments)
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+  
 
   return {
     props: {
-      selectedEvent: event
+      selectedEvent: event,
+      eventComments: fetchedComments,
     },
     revalidate: 30
   };
