@@ -19,9 +19,8 @@ async function insertDocument(client, document) {
 
   if (documents.length < 1) {
     await db.collection("emails").insertOne(document);
-    res.status(201).json({ message: "Signed Up!", document });
   } else {
-    res.status(401).json({ message: "Email already in use", document });
+    throw Error( "Email already in use: " + document.email );
   }
 }
 
@@ -45,18 +44,22 @@ async function handler(req, res) {
     try {
       client = await connectDatabase();
     } catch (error) {
-      res.status(500).json({ message: 'Connection to database failed!' });
+      res.status(500).json({ message: "Connection to database failed!" });
       return;
     }
-    
+
     try {
       await insertDocument(client, { email: email });
-      client.close();
+      res.status(201).json({ message: 'Signed up!' })
+      
     } catch (error) {
-      res.status(500).json({ message: 'Inserting failed!' });
+      if (error.message) {
+        res.status(500).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Inserting failed!" });
       return;
     }
-    
+    client.close();
 
     // const newUser = {
     //   email: email,
@@ -67,7 +70,6 @@ async function handler(req, res) {
     //   .collection("emails")
     //   .find({ email: email })
     //   .toArray();
-
   }
 
   // const duplicate = data.find((userLog) => userLog.email === email);
@@ -82,19 +84,26 @@ async function handler(req, res) {
 
   if (req.method === "GET") {
     // const data = getData();
-    const client = await connectDatabase();
-    const db = client.db();
-    
-    const documents = await db.collection("emails").find().toArray();
-
-    res.status(201).json({ emails: documents });
+    let client;
+    try {
+      client = await connectDatabase();
+    } catch (error) {
+      res.status(500).json({ message: "Connection to database failed!" });
+      return;
+    }
+    try {
+      const db = client.db();
+      const documents = await db.collection("emails").find().toArray();
+      res.status(201).json({ emails: documents });
+    } catch (error) {
+      res.status(500).json({ message: "Reading from database failed!" });
+      return;
+    }
 
     // res.status(201).json({ message: "Signed Up!" });
     // res.status(200).json({ newsletter: data });
     client.close();
   }
-
-  
 }
 
 export default handler;
