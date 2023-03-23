@@ -1,5 +1,12 @@
 import fs from "fs";
 import path from "path";
+import { MongoClient } from "mongodb";
+
+async function connectDatabase() {
+  return await MongoClient.connect(
+    "mongodb+srv://dbAdmin:BLyuBUu4CR@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority"
+  );
+}
 
 function getData() {
   const filePath = path.join(process.cwd(), "data", "comments.json");
@@ -13,7 +20,7 @@ function updateData(newData) {
   fs.writeFileSync(filePath, JSON.stringify(newData));
 }
 
-function handler(req, res) {
+async function handler(req, res) {
   if (req.method === "POST") {
     const id = req.body.id;
     const email = req.body.email;
@@ -35,8 +42,18 @@ function handler(req, res) {
   }
 
   if (req.method === "GET") {
-    const data = getData();
-    res.status(200).json({ comments: data });
+    const client = await connectDatabase();
+    const db = client.db();
+    
+    const collections = await db.listCollections().toArray();
+    const data = collections.map((collection) => (collection.name))
+    const asyncRes = await Promise.all(data.map(async (name) => {
+      return await db.collection(name).find().sort({_id: -1 }).toArray();
+    }));
+
+    res.status(201).json({ comments: asyncRes });
+    // const data = getData();
+    // res.status(200).json({ comments: data });
   }
 }
 
