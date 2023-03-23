@@ -53,8 +53,6 @@ async function handler(req, res) {
     }));
 
     res.status(201).json({ comments: asyncRes });
-    // const data = getData();
-    // res.status(200).json({ comments: data });
   }
 }
 

@@ -16,19 +16,6 @@ function checkIfFileExists(id) {
   }
 }
 
-function getData(id) {
-  const filePath = path.join(process.cwd(), "data", `${id}-comments.json`);
-  const fileData = fs.readFileSync(filePath);
-  const data = JSON.parse(fileData);
-  return data;
-}
-
-function updateData(id, newData) {
-  const filePath = path.join(process.cwd(), "data", `${id}-comments.json`);
-  fs.writeFileSync(filePath, JSON.stringify(newData));
-  return;
-}
-
 async function handler(req, res) {
 
   const client = await MongoClient.connect(
