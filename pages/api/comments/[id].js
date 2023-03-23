@@ -3,6 +3,7 @@ import { MongoClient } from "mongodb";
 
 import { useRouter } from "next/router";
 import path from "path";
+import { password } from "../../../passwords";
 
 function checkIfFileExists(id) {
   var fs = require("fs");
@@ -31,7 +32,7 @@ function updateData(id, newData) {
 async function handler(req, res) {
 
   const client = await MongoClient.connect(
-    `mongodb+srv://dbAdmin:<password>@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority`
+    `mongodb+srv://dbAdmin:${password}@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority`
   );
 
   if (req.method === "POST") {

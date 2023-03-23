@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { MongoClient } from "mongodb";
+import { password } from "../../../passwords";
 
 async function connectDatabase() {
   return await MongoClient.connect(
-    "mongodb+srv://dbAdmin:<password>@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority"
+    `mongodb+srv://dbAdmin:${password}@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority`
   );
 }
 
