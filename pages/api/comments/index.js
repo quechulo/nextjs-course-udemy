@@ -4,7 +4,7 @@ import { MongoClient } from "mongodb";
 
 async function connectDatabase() {
   return await MongoClient.connect(
-    "mongodb+srv://dbAdmin:BLyuBUu4CR@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority"
+    "mongodb+srv://dbAdmin:<password>@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority"
   );
 }
 
