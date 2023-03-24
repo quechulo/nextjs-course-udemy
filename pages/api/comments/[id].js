@@ -1,7 +1,9 @@
 import fs from "fs";
+import { MongoClient } from "mongodb";
 
 import { useRouter } from "next/router";
 import path from "path";
+import { password } from "../../../passwords";
 
 function checkIfFileExists(id) {
   var fs = require("fs");
@@ -27,7 +29,12 @@ function updateData(id, newData) {
   return;
 }
 
-function handler(req, res) {
+async function handler(req, res) {
+
+  const client = await MongoClient.connect(
+    `mongodb+srv://dbAdmin:${password}@cluster23.w305vlv.mongodb.net/comments?retryWrites=true&w=majority`
+  );
+
   if (req.method === "POST") {
     const id = req.body.id;
     const date = req.body.date;
@@ -55,20 +62,25 @@ function handler(req, res) {
       comment: comment,
     };
 
-    checkIfFileExists(id);
-    const data = getData(id);
+    
+    const db = client.db();
 
-    data.push(newComment);
-    updateData(id, data);
+    const result = await db.collection(`${id}-comments`).insertOne(newComment);
+
     res.status(201).json({ message: "Comment added", user: newComment });
   }
 
   if (req.method === "GET") {
     const { id } = req.query;
-    checkIfFileExists(id);
-    const data = getData(id);
-    res.status(200).json({ comments: data });
+
+    const db = client.db();
+    const documents = await db.collection(`${id}-comments`).find().sort({_id: -1 }).toArray();
+    
+
+    res.status(200).json({ comments: documents });
   }
+
+  client.close()
 }
 
 export default handler;
